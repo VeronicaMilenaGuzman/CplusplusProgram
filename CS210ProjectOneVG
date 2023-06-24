@@ -1,0 +1,94 @@
+﻿#include <iostream>
+#include <ctime>
+#include <iomanip>
+
+// Veronica Guzman
+// May 17, 2023
+// CS 210
+
+// Function to display the 12-hour and 24-hour clocks
+void displayClocks(const tm& time12, const tm& time24) {
+    std::cout << "**************************\t\t**************************" << std::endl; // Display separator line
+    std::cout << "*    12-Hour Clock       *\t\t*      24-Hour Clock    *" << std::endl; // Display clock labels
+    std::cout << "*    " << std::put_time(&time12, "%I:%M:%S %p") << "         *\t\t*        " << std::put_time(&time24, "%H:%M:%S") << "         *" << std::endl; // Display 12-hour and 24-hour times
+    std::cout << "**************************\t\t**************************" << std::endl; // Display separator line
+}
+
+// Function to add one hour to the given time and handle overflow
+tm addHour(const tm& time) {
+    tm updatedTime = time;
+    updatedTime.tm_hour = (updatedTime.tm_hour + 1) % 24; // Increment the hour and handle overflow
+    return updatedTime; // Return the updated time
+}
+
+// Function to add one minute to the given time and handle overflow
+tm addMinute(const tm& time) {
+    tm updatedTime = time;
+    updatedTime.tm_min = (updatedTime.tm_min + 1) % 60; // Increment the minute and handle overflow
+
+    // Adjust the hour if the minute overflows to 0
+    if (updatedTime.tm_min == 0) {
+        updatedTime.tm_hour = (updatedTime.tm_hour + 1) % 24;
+    }
+
+    return updatedTime; // Return the updated time
+}
+
+// Function to add one second to the given time and handle overflow
+tm addSecond(const tm& time) {
+    tm updatedTime = time;
+    updatedTime.tm_sec = (updatedTime.tm_sec + 1) % 60; // Increment the second and handle overflow
+
+    // Adjust the minute and hour if the second overflows to 0
+    if (updatedTime.tm_sec == 0) {
+        updatedTime.tm_min = (updatedTime.tm_min + 1) % 60;
+
+        // Adjust the hour if the minute overflows to 0
+        if (updatedTime.tm_min == 0) {
+            updatedTime.tm_hour = (updatedTime.tm_hour + 1) % 24;
+        }
+    }
+
+    return updatedTime; // Return the updated time
+}
+
+int main() {
+    // Get current time as a time_t object
+    time_t currentTime = time(nullptr);
+    // Convert the time_t object to a tm structure using localtime
+    tm* currentTM = localtime(&currentTime);
+
+    // Initial display of clocks using the current time
+    displayClocks(*currentTM, *currentTM);
+
+    // Start an infinite loop to prompt for user input
+    while (true) {
+        std::cout << "**************************" << std::endl; // Display separator line
+        std::cout << "*  1 - Add One Hour      *" << std::endl; // Display option to add one hour
+        std::cout << "*  2 - Add One Minute    *" << std::endl; // Display option to add one minute
+        std::cout << "*  3 - Add One Second    *" << std::endl; // Display option to add one second
+        std::cout << "*  4 - Exit Program      *" << std::endl; // Display option to exit the program
+        std::cout << "**************************" << std::endl; // Display separator line
+
+        int choice;
+        std::cout << "Select an option: ";
+        std::cin >> choice; // Read the user's choice
+
+        if (choice == 1) {
+            *currentTM = addHour(*currentTM); // Add one hour to the current time
+        } else if (choice == 2) {
+            *currentTM = addMinute(*currentTM); // Add one minute to the current time
+        } else if (choice == 3) {
+            *currentTM = addSecond(*currentTM); // Add second to the current time
+        } else if (choice == 4) {
+            break; // If choice is 4 (Exit Program), break out of the while loop
+        } else {
+            std::cout << "Invalid choice. Please try again." << std::endl; // Display error message for invalid choice
+            continue; // Skip the remaining code and start the next iteration of the while loop
+        }
+
+        displayClocks(*currentTM, *currentTM); // Display the updated clocks after processing the user's choice
+    }
+
+    return 0; // Terminate the program and indicate successful execution
+}
